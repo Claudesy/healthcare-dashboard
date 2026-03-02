@@ -1,0 +1,47 @@
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": [
+    "node_modules",
+    "src/lib/cdss/anonymizer.ts",
+    "src/lib/cdss/ddi-checker.ts",
+    "src/lib/cdss/engine.ts",
+    "src/lib/cdss/get-suggestions-flow.ts",
+    "src/lib/cdss/llm-reasoner.ts",
+    "src/lib/cdss/red-flags.ts",
+    "src/lib/cdss/pharmacotherapy-reasoner.ts",
+    "src/lib/cdss/differential-diagnosis.ts",
+    "src/lib/cdss/diagnosis-algorithm.ts",
+    "src/lib/cdss/validation",
+    "src/lib/cdss/**/*.test.ts"
+  ]
+}

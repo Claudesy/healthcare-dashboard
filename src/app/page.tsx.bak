@@ -1,0 +1,284 @@
+"use client";
+
+function calcAge(birthDate: string): number {
+  const today = new Date();
+  const birth = new Date(birthDate);
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
+
+const QUICK_LINKS = [
+  { label: "Satu Sehat",     desc: "Portal Kemenkes RI",          href: "https://satusehat.kemkes.go.id", badge: "KEMENKES"  },
+  { label: "Absen Apel Pagi",desc: "Presensi Harian",             href: "#absen-apel",                   badge: "PRESENSI"  },
+  { label: "SIPARWA",        desc: "Sistem Informasi Presensi",   href: "#siparwa",                      badge: "ABSEN"     },
+  { label: "SIM PKM",        desc: "Sistem Informasi Manajemen",  href: "#simpkm",                       badge: "MANAJEMEN" },
+  { label: "E-Rekam Medis",  desc: "Rekam Medis Elektronik",      href: "#emr",                          badge: "EMR"       },
+  { label: "P-Care BPJS",    desc: "Primary Care BPJS Kesehatan", href: "#pcare",                        badge: "BPJS"      },
+];
+
+export default function ProfilUserPage() {
+  const age = calcAge("1982-02-26");
+
+  return (
+    <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+      <div className="page-header" style={{ maxWidth: 1200, width: "100%" }}>
+        <div className="page-title">Profil User</div>
+        <div className="page-subtitle">Identitas Tenaga Kesehatan &amp; Akses Layanan</div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "420px 1fr", gap: 80, maxWidth: 1200, width: "100%" }}>
+
+        {/* ─── Left: Identity Card ─── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+
+          {/* Avatar + Name block */}
+          <div className="nm-card" style={{
+            padding: "32px",
+            backgroundImage: "linear-gradient(to right, var(--grid-faint) 1px, transparent 1px), linear-gradient(to bottom, var(--grid-faint) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+            marginBottom: 0,
+            borderRadius: "12px 12px 0 0",
+          }}>
+            {/* Avatar */}
+            <div style={{
+              width: 96,
+              height: 96,
+              border: "1px solid var(--c-asesmen)",
+              borderRadius: "50%",
+              marginBottom: 20,
+              boxShadow: "0 0 20px rgba(212, 122, 87, 0.15)",
+              overflow: "hidden",
+              flexShrink: 0,
+              position: "relative",
+            }}>
+              <img
+                src="/doc.png"
+                alt="dr. Ferdi Iskandar"
+                style={{
+                  position: "absolute",
+                  top: "-8%", left: "-5%",
+                  width: "110%", height: "110%",
+                  objectFit: "cover",
+                  objectPosition: "center 15%",
+                }}
+              />
+            </div>
+
+            {/* 1 — Nama */}
+            <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 26, fontWeight: 300, color: "var(--text-main)", lineHeight: 1.2, marginBottom: 8 }}>
+              dr. Ferdi Iskandar
+            </div>
+
+            {/* 2 — Gelar Akademik & Profesional */}
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginBottom: 16 }}>
+              {["S.H.", "M.K.N.", "CLM.", "CMDC."].map((g) => (
+                <span key={g} style={{
+                  fontFamily: "var(--font-geist-mono), monospace",
+                  fontSize: 10,
+                  color: "var(--text-muted)",
+                  letterSpacing: "0.12em",
+                  padding: "2px 7px",
+                  borderRadius: 3,
+                  border: "1px solid var(--line-base)",
+                }}>{g}</span>
+              ))}
+            </div>
+
+            {/* 3 — Posisi di Puskesmas */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12, paddingBottom: 12, borderBottom: "1px dashed var(--line-base)" }}>
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.18em", textTransform: "uppercase" }}>
+                Posisi
+              </div>
+              <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 14, fontWeight: 500, color: "var(--text-main)", letterSpacing: "0.02em" }}>
+                Dokter Penanggung Jawab
+              </div>
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.15em" }}>
+                Puskesmas Balowerti — Kediri
+              </div>
+              <div style={{ marginTop: 4 }}>
+                <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 6 }}>
+                  Konsultan
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 5 }}>
+                  {["KIA", "USG", "IGD", "PONED", "VCT HIV", "JIWA"].map((k) => (
+                    <span key={k} style={{
+                      fontFamily: "var(--font-geist-mono), monospace",
+                      fontSize: 9,
+                      color: "var(--c-asesmen)",
+                      letterSpacing: "0.12em",
+                      padding: "2px 8px",
+                      borderRadius: 3,
+                      border: "1px solid var(--c-asesmen)",
+                      opacity: 0.85,
+                    }}>{k}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* 4 — Institusi & Platform */}
+            <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 16 }}>
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 2 }}>
+                Institusi
+              </div>
+              <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 13, fontWeight: 500, color: "var(--text-main)", letterSpacing: "0.02em" }}>
+                Puskesmas Balowerti
+              </div>
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 9, color: "var(--text-muted)", letterSpacing: "0.12em", opacity: 0.7 }}>
+                Dinas Kesehatan Kota Kediri
+              </div>
+              <div style={{ height: 1, background: "var(--line-base)", margin: "4px 0", opacity: 0.5 }} />
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 10, color: "var(--c-asesmen)", letterSpacing: "0.18em" }}>
+                CEO — SENTRA ARTIFICIAL INTELLIGENCE
+              </div>
+              <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.15em" }}>
+                SENTRAONE PLATFORM
+              </div>
+            </div>
+
+            {/* 5 — Status badges */}
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <span className="tag-meta nm-badge" style={{ color: "var(--c-asesmen)", fontSize: 11, marginLeft: 0 }}>● AKTIF</span>
+              <span className="tag-meta nm-badge" style={{ fontSize: 11, marginLeft: 0 }}>DOKTER UMUM</span>
+              <span className="tag-meta nm-badge" style={{ fontSize: 11, marginLeft: 0 }}>MEDIKOLEGAL</span>
+              <span className="tag-meta nm-badge" style={{ fontSize: 11, marginLeft: 0 }}>AI HEALTHCARE</span>
+            </div>
+          </div>
+
+          {/* Identity Fields */}
+          <div className="nm-card-flat" style={{ borderTop: "none", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 0 }}>
+            <div className="data-label" style={{ marginBottom: 16 }}>Data Pribadi</div>
+            {[
+              { label: "TTL",        val: "Bengkulu, 26 Februari 1982" },
+              { label: "Usia",       val: `${age} tahun` },
+              { label: "Jenis Kel.", val: "Laki-laki" },
+              { label: "Gol. Darah", val: "—" },
+            ].map((f) => (
+              <div key={f.label} className="profil-field">
+                <span className="profil-field-label">{f.label}</span>
+                <span className="profil-field-val">{f.val}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Credentials */}
+          <div className="nm-card-flat" style={{ borderTop: "none", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 0 }}>
+            <div className="data-label" style={{ marginBottom: 16 }}>Kredensial &amp; Lisensi</div>
+            {[
+              { label: "STR", val: "ER00001614473619" },
+              { label: "SIP", val: "503/0129/SIP-SIK-D/419.104/2025" },
+            ].map((f) => (
+              <div key={f.label} className="profil-field">
+                <span className="profil-field-label">{f.label}</span>
+                <span className="profil-field-val" style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 12 }}>{f.val}</span>
+              </div>
+            ))}
+            <div style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="ai-pulse-dot" style={{ background: "#4ADE80", boxShadow: "0 0 8px #4ADE80" }} />
+              <span style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.1em" }}>
+                STR &amp; SIP VALID — 2025
+              </span>
+            </div>
+          </div>
+
+          {/* Org */}
+          <div className="nm-card-flat" style={{ borderTop: "none", padding: "24px 32px", display: "flex", flexDirection: "column", gap: 0, borderRadius: "0 0 12px 12px" }}>
+            <div className="data-label" style={{ marginBottom: 16 }}>Organisasi</div>
+            {[
+              { label: "Jabatan",   val: "CEO & Founder" },
+              { label: "Institusi", val: "Sentra Artificial Intelligence" },
+              { label: "Platform",  val: "SentraOne" },
+              { label: "Domisili",  val: "Kediri, Indonesia" },
+            ].map((f) => (
+              <div key={f.label} className="profil-field">
+                <span className="profil-field-label">{f.label}</span>
+                <span className="profil-field-val">{f.val}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ─── Right: Quick Links & Akses Layanan ─── */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 48 }}>
+
+          <div>
+            <div className="section-title" style={{ marginBottom: 32 }}>Akses Layanan</div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+              {QUICK_LINKS.map((link, i) => (
+                <a
+                  key={i}
+                  href={link.href}
+                  target={link.href.startsWith("http") ? "_blank" : undefined}
+                  rel={link.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto",
+                    alignItems: "center",
+                    gap: 24,
+                    padding: "18px 0",
+                    borderBottom: "1px dashed var(--line-base)",
+                    textDecoration: "none",
+                    transition: "all 0.2s",
+                    cursor: "pointer",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.paddingLeft = "12px";
+                    e.currentTarget.style.background = "rgba(239,236,230,0.02)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.paddingLeft = "0";
+                    e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <div>
+                    <div style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 18, color: "var(--text-main)", marginBottom: 4 }}>
+                      {link.label}
+                    </div>
+                    <div style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 13, color: "var(--text-muted)", letterSpacing: "0.1em" }}>
+                      {link.desc}
+                    </div>
+                  </div>
+                  <span className="tag-meta">{link.badge}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Status Panel */}
+          <div>
+            <div className="section-title" style={{ marginBottom: 24 }}>Status Hari Ini</div>
+            <div className="nm-card" style={{ padding: "24px 28px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+                {[
+                  { label: "Shift",           val: "Pagi (07:00 – 14:00)", ok: true  },
+                  { label: "Apel Pagi",       val: "Belum Absen",          ok: false },
+                  { label: "SIPARWA",         val: "Belum Check-in",       ok: false },
+                  { label: "Pasien Hari Ini", val: "8 pasien",             ok: true  },
+                  { label: "SenAuto Session", val: "Active",               ok: true  },
+                ].map((s) => (
+                  <div key={s.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px dashed var(--line-base)", paddingBottom: 10, marginBottom: 10 }}>
+                    <span style={{ fontFamily: "var(--font-geist-mono), monospace", fontSize: 10, color: "var(--text-muted)", letterSpacing: "0.1em", textTransform: "uppercase" }}>
+                      {s.label}
+                    </span>
+                    <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                      <span style={{
+                        width: 5, height: 5, borderRadius: "50%",
+                        background: s.ok ? "#4ADE80" : "var(--c-warning)",
+                        boxShadow: s.ok ? "0 0 6px #4ADE80" : "0 0 6px var(--c-warning)",
+                        display: "inline-block",
+                      }} />
+                      <span style={{ fontFamily: "var(--font-geist-sans), sans-serif", fontSize: 15, color: "var(--text-main)" }}>{s.val}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
