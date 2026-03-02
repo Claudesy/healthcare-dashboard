@@ -2,6 +2,9 @@
   "name": "puskesmas-app",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "scripts": {
     "dev": "tsx server.ts",
     "dev:clean": "node -e \"try{require('fs').rmSync('.next/dev/lock')}catch(e){}\" && tsx server.ts",
