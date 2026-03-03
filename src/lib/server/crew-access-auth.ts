@@ -60,24 +60,45 @@ function parseUsersFromJson(raw: string): CrewAccessCredential[] {
   return users;
 }
 
+function tryParseUsersJson(raw: string): CrewAccessCredential[] {
+  // Pass 1: parse langsung
+  const parsed = JSON.parse(raw);
+  // Pass 2: Railway kadang wrap array dalam string — double-parse
+  if (typeof parsed === "string") return parseUsersFromJson(parsed);
+  return parseUsersFromJson(raw);
+}
+
 function loadUsersFromEnv(): CrewAccessCredential[] {
   const json = process.env.CREW_ACCESS_USERS_JSON?.trim() ?? "";
   if (!json) return [];
+
+  // Attempt 1: parse as-is
   try {
-    return parseUsersFromJson(json);
-  } catch (err) {
-    console.error("[crew-access] CREW_ACCESS_USERS_JSON parse error:", err);
-    // Fallback: Railway kadang escape double-quotes — coba unescape dulu
-    try {
-      const unescaped = json.replace(/\\"/g, '"');
-      const result = parseUsersFromJson(unescaped);
-      console.log("[crew-access] Berhasil parse setelah unescape. Users:", result.length);
-      return result;
-    } catch (err2) {
-      console.error("[crew-access] Unescape juga gagal:", err2);
-      console.error("[crew-access] Raw JSON (50 char pertama):", json.slice(0, 50));
-      return [];
-    }
+    return tryParseUsersJson(json);
+  } catch (err1) {
+    console.error("[crew-access] Parse attempt 1 failed:", (err1 as Error).message);
+  }
+
+  // Attempt 2: unescape \" → " (Railway kadang escape quotes)
+  try {
+    const unescaped = json.replace(/\\"/g, '"');
+    const result = tryParseUsersJson(unescaped);
+    console.log("[crew-access] Parse berhasil setelah unescape. Users:", result.length);
+    return result;
+  } catch (err2) {
+    console.error("[crew-access] Parse attempt 2 (unescape) failed:", (err2 as Error).message);
+  }
+
+  // Attempt 3: strip outer quotes jika Railway wrap dengan "..."
+  try {
+    const stripped = json.replace(/^["']|["']$/g, "");
+    const result = tryParseUsersJson(stripped);
+    console.log("[crew-access] Parse berhasil setelah strip outer quotes. Users:", result.length);
+    return result;
+  } catch (err3) {
+    console.error("[crew-access] Parse attempt 3 (strip quotes) failed:", (err3 as Error).message);
+    console.error("[crew-access] Raw JSON (60 char pertama):", json.slice(0, 60));
+    return [];
   }
 }
 
