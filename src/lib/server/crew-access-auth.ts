@@ -13,12 +13,14 @@ import { CREW_USERS } from "@/lib/server/crew-access-users";
 
 interface CrewAccessCredential extends CrewAccessUser {
   password: string;
+  role: string;
 }
 
 interface SessionPayloadV1 {
   v: 1;
   username: string;
   displayName: string;
+  role: string;
   issuedAt: number;
   expiresAt: number;
 }
@@ -55,6 +57,7 @@ function parseUsersFromJson(raw: string): CrewAccessCredential[] {
       username: normalizeUsername(username),
       password,
       displayName,
+      role: String((item as { role?: unknown }).role ?? "PERAWAT").trim(),
     });
   }
 
@@ -168,6 +171,7 @@ function toSession(payload: SessionPayloadV1): CrewAccessSession {
   return {
     username: payload.username,
     displayName: payload.displayName,
+    role: payload.role ?? "PERAWAT",
     issuedAt: payload.issuedAt,
     expiresAt: payload.expiresAt,
   };
@@ -179,7 +183,7 @@ export function validateCrewAccess(username: string, password: string): CrewAcce
   const found = users.find((u) => u.username === normalizedUsername);
   if (!found) return null;
   if (found.password !== password) return null;
-  return { username: found.username, displayName: found.displayName };
+  return { username: found.username, displayName: found.displayName, role: found.role };
 }
 
 export function createCrewSession(user: CrewAccessUser): {
@@ -191,6 +195,7 @@ export function createCrewSession(user: CrewAccessUser): {
     v: 1,
     username: normalizeUsername(user.username),
     displayName: user.displayName,
+    role: user.role ?? "PERAWAT",
     issuedAt: nowSeconds,
     expiresAt: nowSeconds + CREW_ACCESS_SESSION_TTL_SECONDS,
   };

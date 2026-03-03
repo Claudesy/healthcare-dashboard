@@ -1,0 +1,179 @@
+// ============================================================
+// PKM Dashboard — Prisma Schema
+// Telemedicine Module — Sentra Healthcare Solutions © 2025
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum ConsultationType {
+  VIDEO
+  AUDIO
+  CHAT
+}
+
+enum SessionParticipantRole {
+  DOCTOR
+  NURSE
+  PATIENT
+  OBSERVER
+}
+
+// ─── MODELS ──────────────────────────────────────────────────
+
+model TelemedicineAppointment {
+  id                String            @id @default(cuid())
+
+  // Identitas peserta (menggunakan username dari CrewAccessSession)
+  patientId         String
+  patientPhone      String?           // No HP pasien untuk WhatsApp notifikasi
+  patientJoinToken  String?           @unique // Token sekali pakai untuk pasien join tanpa login
+  doctorId          String
+  createdByStaffId  String
+
+  // Detail jadwal
+  scheduledAt       DateTime
+  durationMinutes   Int               @default(15)
+  consultationType  ConsultationType  @default(VIDEO)
+  status            AppointmentStatus @default(PENDING)
+
+  // BPJS / P-Care Integration
+  bpjsNomorSEP      String?
+  pCareNoKunjungan  String?
+  diagnosaICD10     String?
+  diagnosaInaCBGs   String?
+
+  // Keluhan pasien sebelum konsultasi
+  keluhanUtama      String?
+  riwayatPenyakit   String?
+
+  // Hasil konsultasi (diisi dokter)
+  anamnesis         String?
+  pemeriksaan       String?
+  diagnosis         String?
+  tatalaksana       String?
+  resepDigital      Json?
+  rujukan           Boolean           @default(false)
+  rujukanTujuan     String?
+
+  // LiveKit Room
+  livekitRoomName   String?           @unique
+  livekitRoomId     String?
+
+  // SATUSEHAT
+  satusehatEncounterId String?
+
+  // Timestamps
+  startedAt         DateTime?
+  endedAt           DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  deletedAt         DateTime?
+
+  // Relations
+  session           TelemedicineSession?
+  attachments       TelemedicineAttachment[]
+  auditLogs         TelemedicineAuditLog[]
+
+  @@index([patientId])
+  @@index([doctorId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("telemedicine_appointments")
+}
+
+model TelemedicineSession {
+  id                    String    @id @default(cuid())
+  appointmentId         String    @unique
+
+  roomName              String    @unique
+  roomSid               String?
+
+  recordingEnabled      Boolean   @default(false)
+  recordingUrl          String?
+  recordingConsent      Boolean   @default(false)
+
+  actualStartAt         DateTime?
+  actualEndAt           DateTime?
+  actualDurationSeconds Int?
+
+  avgNetworkQuality     Json?
+
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  appointment           TelemedicineAppointment @relation(fields: [appointmentId], references: [id])
+  participants          TelemedicineParticipant[]
+
+  @@map("telemedicine_sessions")
+}
+
+model TelemedicineParticipant {
+  id              String                 @id @default(cuid())
+  sessionId       String
+  userId          String
+  role            SessionParticipantRole
+  livekitIdentity String
+  joinedAt        DateTime?
+  leftAt          DateTime?
+
+  session         TelemedicineSession @relation(fields: [sessionId], references: [id])
+
+  @@unique([sessionId, userId])
+  @@index([sessionId])
+  @@map("telemedicine_participants")
+}
+
+model TelemedicineAttachment {
+  id               String    @id @default(cuid())
+  appointmentId    String
+  uploadedByUserId String
+
+  fileName         String
+  fileType         String
+  fileSizeBytes    Int
+
+  storagePath      String
+  encryptionKeyId  String
+
+  category         String
+
+  createdAt        DateTime  @default(now())
+  deletedAt        DateTime?
+
+  appointment      TelemedicineAppointment @relation(fields: [appointmentId], references: [id])
+
+  @@index([appointmentId])
+  @@map("telemedicine_attachments")
+}
+
+model TelemedicineAuditLog {
+  id            String    @id @default(cuid())
+  appointmentId String
+  userId        String
+  action        String
+  metadata      Json?
+  createdAt     DateTime  @default(now())
+
+  appointment   TelemedicineAppointment @relation(fields: [appointmentId], references: [id])
+
+  @@index([appointmentId])
+  @@index([userId])
+  @@map("telemedicine_audit_logs")
+}

@@ -7,12 +7,13 @@ import { ArrowRight, LogOutIcon, MoonIcon, PanelLeftCloseIcon, PanelLeftOpenIcon
 import { useTheme } from "./ThemeProvider";
 
 const NAV_ITEMS = [
-  { href: "/",       label: "Profil User"  },
-  { href: "/emr",    label: "EMR Klinis"   },
-  { href: "/icdx",   label: "ICD-X Finder" },
-  { href: "/report", label: "Report"       },
-  { href: "/voice",  label: "Consult Audrey" },
-  { href: "/acars",  label: "ACARS"        },
+  { href: "/",              label: "Profil User"    },
+  { href: "/emr",           label: "EMR Klinis"     },
+  { href: "/icdx",          label: "ICD-X Finder"   },
+  { href: "/telemedicine",  label: "Telemedicine"   },
+  { href: "/report",        label: "Report"         },
+  { href: "/voice",         label: "Consult Audrey" },
+  { href: "/acars",         label: "ACARS"          },
 ];
 
 const ACCENT = "#E67E22";

@@ -1,14 +1,24 @@
 "use client";
 
 import { FormEvent, type ReactNode, useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+
+// Route publik yang tidak memerlukan autentikasi crew
+const PUBLIC_PATHS = ["/join/"];
 
 interface CrewAccessGateProps {
   children: ReactNode;
 }
 
 export default function CrewAccessGate({ children }: CrewAccessGateProps) {
+  const pathname = usePathname();
   const [isCheckingSession, setIsCheckingSession] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Bypass auth untuk route publik (halaman join pasien)
+  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) {
+    return <>{children}</>;
+  }
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");

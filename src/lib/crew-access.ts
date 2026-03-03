@@ -1,11 +1,13 @@
 export interface CrewAccessUser {
   username: string;
   displayName: string;
+  role?: string;
 }
 
 export interface CrewAccessSession {
   username: string;
   displayName: string;
+  role: string;
   issuedAt: number;
   expiresAt: number;
 }
