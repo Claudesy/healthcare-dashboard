@@ -23,6 +23,7 @@
 
 - [Overview](#overview)
 - [Key Features](#key-features)
+- [Telemedicine Module](#telemedicine-module)
 - [Technology Stack](#technology-stack)
 - [Architecture](#architecture)
 - [Project Structure](#project-structure)
@@ -78,6 +79,9 @@ API-driven diagnostic suggestion engine combining a local disease knowledge base
 
 ### 🔐 Crew Access Portal
 Authentication gate requiring crew credentials before any dashboard access. Session management uses **HMAC-signed cookies** with a 12-hour TTL. Credentials are sourced from environment variables, a runtime JSON file, or compiled defaults — in that priority order.
+
+### 📹 Telemedicine — Virtual Consultation
+Real-time video consultation module enabling remote patient-doctor interactions powered by **WebRTC** peer-to-peer connections, with **Socket.IO** signaling and a STUN/TURN relay fallback for restrictive networks. Supports HD video/audio calls, in-call text chat, file sharing (lab results, prescriptions), and session recording with consent. Each session is linked to the patient's EMR for automatic post-consultation note generation.
 
 ---
 
@@ -261,6 +265,105 @@ npm run start
 | `npm run dev:next` | Start Next.js dev server without the custom server |
 | `npm run build` | Compile the production bundle |
 | `npm run start` | Start the production server via the custom server |
+
+---
+
+## Telemedicine Module
+
+The Telemedicine module provides a complete virtual consultation workflow integrated directly into the clinical dashboard. It enables Puskesmas staff to conduct secure video consultations with patients — reducing the need for in-person visits for follow-ups, medication reviews, and remote triage.
+
+### Key Capabilities
+
+| Capability | Details |
+|---|---|
+| Video Engine | WebRTC (peer-to-peer, browser-native) |
+| Signaling | Socket.IO rooms per consultation session |
+| Network Fallback | STUN/TURN relay for restricted NAT environments |
+| Audio/Video Quality | Adaptive bitrate, HD (720p default) |
+| In-call Chat | Real-time text with file attachment support |
+| Session Recording | Opt-in, consent-gated, stored server-side |
+| EMR Integration | Auto-generates SOAP note draft post-session |
+| Scheduling | Built-in appointment slot management |
+| Queue Management | Virtual waiting room with estimated wait time |
+| Patient Link | One-time URL sent via SMS/WhatsApp |
+
+### Workflow
+
+```
+Doctor creates slot → Patient receives link
+        ↓
+Patient joins waiting room (no login required)
+        ↓
+Doctor admits patient → WebRTC session established
+        ↓
+Consultation (video + chat + file sharing)
+        ↓
+Doctor closes session → Draft SOAP note generated
+        ↓
+Doctor reviews & saves to EMR → ICD-X coded
+```
+
+### Project Structure (Telemedicine)
+
+```
+src/
+├── app/
+│   ├── telemedicine/
+│   │   ├── page.tsx           # Doctor's consultation dashboard
+│   │   ├── room/[id]/
+│   │   │   └── page.tsx       # Active consultation room (WebRTC)
+│   │   ├── schedule/
+│   │   │   └── page.tsx       # Appointment scheduling
+│   │   └── waiting/[token]/
+│   │       └── page.tsx       # Patient waiting room (public)
+│   └── api/
+│       └── telemedicine/
+│           ├── sessions/      # Create, list, close sessions
+│           ├── signal/        # WebRTC signaling (offer/answer/ICE)
+│           ├── recording/     # Start, stop, fetch recordings
+│           └── schedule/      # Appointment slot management
+│
+└── lib/
+    └── telemedicine/
+        ├── webrtc.ts          # WebRTC peer connection helpers
+        ├── signaling.ts       # Socket.IO signaling server logic
+        ├── recorder.ts        # MediaStream recording & upload
+        └── soap-generator.ts  # Gemini-powered SOAP note draft
+```
+
+### API Endpoints (Telemedicine)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/telemedicine/sessions` | Create a new consultation session |
+| `GET` | `/api/telemedicine/sessions` | List all sessions (paginated) |
+| `GET` | `/api/telemedicine/sessions/:id` | Get session details |
+| `PATCH` | `/api/telemedicine/sessions/:id` | Update session status |
+| `POST` | `/api/telemedicine/signal` | WebRTC signaling relay |
+| `POST` | `/api/telemedicine/recording/start` | Begin session recording |
+| `POST` | `/api/telemedicine/recording/stop` | End recording & save |
+| `GET` | `/api/telemedicine/schedule` | List available appointment slots |
+| `POST` | `/api/telemedicine/schedule` | Create appointment slot |
+
+### Environment Variables (Telemedicine)
+
+Add the following to your `.env.local`:
+
+```env
+# ─── Telemedicine ─────────────────────────────────────────────
+# WebRTC STUN/TURN server (use a public STUN for dev)
+TURN_SERVER_URL=turn:<your-turn-server>:3478
+TURN_SERVER_USERNAME=<turn-username>
+TURN_SERVER_CREDENTIAL=<turn-password>
+
+# Recording storage (local path or S3-compatible bucket)
+RECORDING_STORAGE_PATH=<absolute-path-or-s3-bucket>
+
+# Patient join link base URL
+TELEMEDICINE_PUBLIC_BASE_URL=https://<your-domain>/telemedicine/waiting
+```
+
+> **Privacy Note:** Session recordings contain sensitive PHI (Protected Health Information). Ensure storage is encrypted at rest and access is restricted to authorized clinical staff only.
 
 ---
 
