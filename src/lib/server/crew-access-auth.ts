@@ -63,7 +63,22 @@ function parseUsersFromJson(raw: string): CrewAccessCredential[] {
 function loadUsersFromEnv(): CrewAccessCredential[] {
   const json = process.env.CREW_ACCESS_USERS_JSON?.trim() ?? "";
   if (!json) return [];
-  return parseUsersFromJson(json);
+  try {
+    return parseUsersFromJson(json);
+  } catch (err) {
+    console.error("[crew-access] CREW_ACCESS_USERS_JSON parse error:", err);
+    // Fallback: Railway kadang escape double-quotes — coba unescape dulu
+    try {
+      const unescaped = json.replace(/\\"/g, '"');
+      const result = parseUsersFromJson(unescaped);
+      console.log("[crew-access] Berhasil parse setelah unescape. Users:", result.length);
+      return result;
+    } catch (err2) {
+      console.error("[crew-access] Unescape juga gagal:", err2);
+      console.error("[crew-access] Raw JSON (50 char pertama):", json.slice(0, 50));
+      return [];
+    }
+  }
 }
 
 function loadUsersFromFile(): CrewAccessCredential[] {
@@ -231,7 +246,13 @@ export function getSessionCookieOptions() {
 
 export function getCrewAccessConfigStatus(): { ok: boolean; message: string } {
   try {
+    const hasEnvJson = !!(process.env.CREW_ACCESS_USERS_JSON?.trim());
+    const hasEnvSecret = !!(process.env.CREW_ACCESS_SECRET?.trim());
+    console.log("[crew-access] Config check — CREW_ACCESS_USERS_JSON ada:", hasEnvJson, "| CREW_ACCESS_SECRET ada:", hasEnvSecret);
+
     const users = getCrewAccessUsers();
+    console.log("[crew-access] Users loaded:", users.length);
+
     if (users.length === 0) {
       return {
         ok: false,
@@ -241,6 +262,7 @@ export function getCrewAccessConfigStatus(): { ok: boolean; message: string } {
     getSecret();
     return { ok: true, message: "" };
   } catch (error) {
+    console.error("[crew-access] Config status error:", error);
     return {
       ok: false,
       message: error instanceof Error ? error.message : "Konfigurasi auth tidak valid.",
