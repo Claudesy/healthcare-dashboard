@@ -2,16 +2,17 @@
 // PKM Dashboard — Telemedicine Types
 // ============================================================
 
-import type {
-  TelemedicineAppointment,
-  TelemedicineSession,
-  AppointmentStatus,
-  ConsultationType,
-  SessionParticipantRole,
-} from "@prisma/client";
+export type AppointmentStatus =
+  | "PENDING"
+  | "CONFIRMED"
+  | "IN_PROGRESS"
+  | "COMPLETED"
+  | "CANCELLED"
+  | "NO_SHOW";
 
-// ─── RE-EXPORTS ───────────────────────────────────────────────
-export type { AppointmentStatus, ConsultationType, SessionParticipantRole };
+export type ConsultationType = "VIDEO" | "AUDIO" | "CHAT";
+
+export type SessionParticipantRole = "DOCTOR" | "NURSE" | "PATIENT" | "OBSERVER";
 
 // ─── API RESPONSE WRAPPER ─────────────────────────────────────
 export interface ApiResponse<T> {
@@ -34,8 +35,55 @@ export interface CreateAppointmentInput {
   bpjsNomorSEP?: string;
 }
 
-export interface AppointmentWithDetails extends TelemedicineAppointment {
-  session: TelemedicineSession | null;
+export interface TelemedicineSessionDetails {
+  id: string;
+  appointmentId: string;
+  roomName: string;
+  roomSid: string | null;
+  recordingEnabled: boolean;
+  recordingUrl: string | null;
+  recordingConsent: boolean;
+  actualStartAt: Date | string | null;
+  actualEndAt: Date | string | null;
+  actualDurationSeconds: number | null;
+  avgNetworkQuality: unknown | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface AppointmentWithDetails {
+  id: string;
+  patientId: string;
+  patientPhone: string | null;
+  patientJoinToken: string | null;
+  doctorId: string;
+  createdByStaffId: string;
+  scheduledAt: Date | string;
+  durationMinutes: number;
+  consultationType: ConsultationType;
+  status: AppointmentStatus;
+  bpjsNomorSEP: string | null;
+  pCareNoKunjungan: string | null;
+  diagnosaICD10: string | null;
+  diagnosaInaCBGs: string | null;
+  keluhanUtama: string | null;
+  riwayatPenyakit: string | null;
+  anamnesis: string | null;
+  pemeriksaan: string | null;
+  diagnosis: string | null;
+  tatalaksana: string | null;
+  resepDigital: unknown | null;
+  rujukan: boolean;
+  rujukanTujuan: string | null;
+  livekitRoomName: string | null;
+  livekitRoomId: string | null;
+  satusehatEncounterId: string | null;
+  startedAt: Date | string | null;
+  endedAt: Date | string | null;
+  createdAt: Date | string;
+  updatedAt: Date | string;
+  deletedAt: Date | string | null;
+  session: TelemedicineSessionDetails | null;
 }
 
 // ─── LIVEKIT TOKEN ────────────────────────────────────────────
