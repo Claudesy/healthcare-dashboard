@@ -17,8 +17,8 @@
     "@google/generative-ai": "^0.24.1",
     "@livekit/components-react": "^2.9.20",
     "@livekit/components-styles": "^1.2.0",
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^7.4.2",
+    "@prisma/adapter-pg": "^6.16.1",
+    "@prisma/client": "^6.16.1",
     "@types/js-yaml": "^4.0.9",
     "geist": "^1.7.0",
     "js-yaml": "^4.1.1",
@@ -43,7 +43,7 @@
     "@types/pg": "^8.18.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "prisma": "^7.4.2",
+    "prisma": "^6.16.1",
     "tsx": "^4.21.0",
     "typescript": "^5"
   }
