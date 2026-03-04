@@ -11,6 +11,23 @@ import { prisma } from "@/lib/prisma";
 import { getLiveKitConfig } from "@/lib/telemedicine/token";
 import type { ApiResponse } from "@/types/telemedicine.types";
 
+// ── Simple in-memory rate limiter (per token, per menit) ─────────────────────
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 10;
+const RATE_LIMIT_WINDOW_MS = 60_000;
+
+function checkRateLimit(key: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(key);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (entry.count >= RATE_LIMIT_MAX) return false;
+  entry.count++;
+  return true;
+}
+
 interface JoinInfo {
   appointmentId: string;
   doctorId: string;
@@ -23,10 +40,18 @@ interface JoinInfo {
 
 // GET — ambil info appointment by joinToken (publik, tanpa auth)
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ token: string }> }
 ): Promise<NextResponse> {
   const { token } = await params;
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(`get:${ip}`)) {
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, data: null, message: "Terlalu banyak permintaan. Coba lagi dalam 1 menit.", timestamp: new Date().toISOString() },
+      { status: 429 }
+    );
+  }
 
   const appointment = await prisma.telemedicineAppointment.findUnique({
     where: { patientJoinToken: token, deletedAt: null },
@@ -70,6 +95,14 @@ export async function POST(
   { params }: { params: Promise<{ token: string }> }
 ): Promise<NextResponse> {
   const { token } = await params;
+
+  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown";
+  if (!checkRateLimit(`post:${token}:${ip}`)) {
+    return NextResponse.json<ApiResponse<null>>(
+      { success: false, data: null, message: "Terlalu banyak permintaan. Coba lagi dalam 1 menit.", timestamp: new Date().toISOString() },
+      { status: 429 }
+    );
+  }
 
   const body = await request.json().catch(() => null) as { displayName?: string } | null;
   const displayName = (body?.displayName ?? "Pasien").trim().slice(0, 50) || "Pasien";

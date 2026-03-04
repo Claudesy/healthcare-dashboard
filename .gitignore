@@ -55,6 +55,14 @@ AGENTS.md
 crew-access-users.json
 public/data/stok_obat.json
 
+# Test artifacts
+test-*.png
+test-*.mjs
+test-*.js
+
+# Telemedicine scratch/output folder (gunakan src/app/telemedicine/ saja)
+/telemedicine/
+
 # AI agent config folders
 database/.agents/
 database/.claude/
