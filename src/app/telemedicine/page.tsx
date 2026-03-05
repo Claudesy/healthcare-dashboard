@@ -6,6 +6,7 @@ import { Video, Plus, Clock, CheckCircle, XCircle, AlertCircle, RefreshCw, Wifi,
 import { io as socketIO } from "socket.io-client";
 
 import { AppointmentBooking } from "@/components/telemedicine/AppointmentBooking";
+import { useTheme } from "@/components/ThemeProvider";
 import type { AppointmentWithDetails, AppointmentStatus } from "@/types/telemedicine.types";
 
 interface TeleRequest {
@@ -20,35 +21,41 @@ interface TeleRequest {
   createdAt: string;
 }
 
-/* ── Design tokens — sama dengan halaman Profile User ── */
-const L = {
-  bg:        "#0f0f0f",
-  bgPanel:   "#141414",
-  bgHover:   "rgba(255,255,255,0.03)",
-  border:    "rgba(255,255,255,0.08)",
-  borderAcc: "rgba(230,126,34,0.4)",
-  text:      "#d4d4d4",
-  muted:     "#666666",
-  accent:    "#E67E22",
-  green:     "#4ADE80",
-  mono:      "var(--font-geist-mono), 'Fira Code', monospace",
-  sans:      "var(--font-geist-sans), sans-serif",
-};
+/* ── Design tokens — theme-aware ── */
+function useL() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  return {
+    bg:        isDark ? "var(--bg-canvas)"            : "var(--bg-canvas)",
+    bgPanel:   isDark ? "#303030"                     : "var(--bg-card, #F5EEE4)",
+    bgHover:   isDark ? "rgba(255,255,255,0.05)"      : "rgba(201,168,124,0.06)",
+    border:    isDark ? "rgba(255,255,255,0.10)"      : "var(--line-base)",
+    borderAcc: isDark ? "rgba(230,126,34,0.4)"        : "rgba(201,168,124,0.5)",
+    text:      isDark ? "#d4d4d4"                     : "var(--text-main)",
+    muted:     isDark ? "#777777"                     : "var(--text-muted)",
+    accent:    isDark ? "#E67E22"                     : "var(--c-asesmen)",
+    green:     "#4ADE80",
+    mono:      "var(--font-geist-mono), 'Fira Code', monospace",
+    sans:      "var(--font-geist-sans), sans-serif",
+  };
+}
+
+type LTokens = ReturnType<typeof useL>;
 
 /* ── Shared primitives ── */
-const Panel = ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) => (
+const Panel = ({ L, children, style }: { L: LTokens; children: React.ReactNode; style?: React.CSSProperties }) => (
   <div style={{ background: L.bgPanel, border: `1px solid ${L.border}`, borderRadius: 4, overflow: "hidden", ...style }}>
     {children}
   </div>
 );
 
-const PanelSection = ({ children, last = false }: { children: React.ReactNode; last?: boolean }) => (
+const PanelSection = ({ L, children, last = false }: { L: LTokens; children: React.ReactNode; last?: boolean }) => (
   <div style={{ padding: "12px 18px", borderBottom: last ? "none" : `1px solid ${L.border}` }}>
     {children}
   </div>
 );
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+const SectionLabel = ({ L, children }: { L: LTokens; children: React.ReactNode }) => (
   <div style={{ fontFamily: L.mono, fontSize: 11, color: L.muted, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>
     {children}
   </div>
@@ -59,7 +66,7 @@ const STATUS_CONFIG: Record<AppointmentStatus, { label: string; color: string; i
   PENDING:     { label: "Menunggu",     color: "#facc15", icon: <Clock size={11} /> },
   CONFIRMED:   { label: "Dikonfirmasi", color: "#60a5fa", icon: <CheckCircle size={11} /> },
   IN_PROGRESS: { label: "Berlangsung",  color: "#4ADE80", icon: <Video size={11} /> },
-  COMPLETED:   { label: "Selesai",      color: L.muted,   icon: <CheckCircle size={11} /> },
+  COMPLETED:   { label: "Selesai",      color: "#777777", icon: <CheckCircle size={11} /> },
   CANCELLED:   { label: "Dibatalkan",   color: "#f87171", icon: <XCircle size={11} /> },
   NO_SHOW:     { label: "Tidak Hadir",  color: "#fb923c", icon: <AlertCircle size={11} /> },
 };
@@ -75,25 +82,23 @@ const FLOW_STEPS = [
   { num: "07", code: "SELESAI",  label: "Dokter & Pasien Terhubung", sub: "konsultasi berlangsung" },
 ];
 
-function PatientFlowDiagram() {
+function PatientFlowDiagram({ L }: { L: LTokens }) {
   return (
-    <Panel style={{ height: "100%" }}>
-      <PanelSection>
-        <SectionLabel>Alur Kerja Pasien</SectionLabel>
+    <Panel L={L} style={{ height: "100%" }}>
+      <PanelSection L={L}>
+        <SectionLabel L={L}>Alur Kerja Pasien</SectionLabel>
       </PanelSection>
-      <PanelSection last>
+      <PanelSection L={L} last>
         <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
           {FLOW_STEPS.map((step, i) => (
             <div key={step.code}>
-              {/* Step row */}
               <div style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "8px 0" }}>
-                {/* Number + connector column */}
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flexShrink: 0, width: 28 }}>
                   <div style={{
                     width: 28, height: 28,
                     borderRadius: "50%",
-                    border: `1px solid ${i === 6 ? L.border : "rgba(255,255,255,0.15)"}`,
-                    background: i === 6 ? "rgba(255,255,255,0.05)" : "#1a1a1a",
+                    border: `1px solid ${i === 6 ? L.borderAcc : L.border}`,
+                    background: L.bgPanel,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     fontFamily: L.mono, fontSize: 10,
                     color: i === 6 ? L.accent : L.muted,
@@ -106,23 +111,15 @@ function PatientFlowDiagram() {
                     <div style={{ width: 1, height: 20, background: L.border, marginTop: 3 }} />
                   )}
                 </div>
-
-                {/* Text */}
                 <div style={{ paddingTop: 4 }}>
-                  <div style={{
-                    fontFamily: L.mono, fontSize: 9,
-                    color: L.muted,
-                    letterSpacing: "0.12em",
-                    marginBottom: 2,
-                  }}>
+                  <div style={{ fontFamily: L.mono, fontSize: 9, color: L.muted, letterSpacing: "0.12em", marginBottom: 2 }}>
                     {step.code}
                   </div>
                   <div style={{
                     fontFamily: L.sans, fontSize: 12,
-                    color: i === 6 ? L.text : "rgba(212,212,212,0.75)",
+                    color: i === 6 ? L.text : L.muted,
                     fontWeight: i === 6 ? 500 : 400,
-                    lineHeight: 1.3,
-                    marginBottom: 1,
+                    lineHeight: 1.3, marginBottom: 1,
                   }}>
                     {step.label}
                   </div>
@@ -141,11 +138,12 @@ function PatientFlowDiagram() {
 
 /* ── AppointmentRow ── */
 interface AppointmentCardProps {
+  L: LTokens;
   appointment: AppointmentWithDetails;
   onJoin?: () => void;
 }
 
-function AppointmentRow({ appointment, onJoin }: AppointmentCardProps) {
+function AppointmentRow({ L, appointment, onJoin }: AppointmentCardProps) {
   const status = STATUS_CONFIG[appointment.status];
   const isActive = ["PENDING", "CONFIRMED", "IN_PROGRESS"].includes(appointment.status);
   const scheduledAt = new Date(appointment.scheduledAt);
@@ -165,7 +163,6 @@ function AppointmentRow({ appointment, onJoin }: AppointmentCardProps) {
       onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
     >
       <div>
-        {/* ID + status badge */}
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
           <span style={{ fontFamily: L.mono, fontSize: 11, color: L.accent, letterSpacing: "0.05em" }}>
             #{appointment.id.slice(-8).toUpperCase()}
@@ -180,20 +177,14 @@ function AppointmentRow({ appointment, onJoin }: AppointmentCardProps) {
             {status.icon}&nbsp;{status.label}
           </span>
         </div>
-
-        {/* Info baris */}
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <span style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>
             {scheduledAt.toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })}
           </span>
           <span style={{ color: L.border }}>·</span>
-          <span style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>
-            {appointment.durationMinutes}m
-          </span>
+          <span style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>{appointment.durationMinutes}m</span>
           <span style={{ color: L.border }}>·</span>
-          <span style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>
-            {appointment.doctorId}
-          </span>
+          <span style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>{appointment.doctorId}</span>
           {appointment.keluhanUtama && (
             <>
               <span style={{ color: L.border }}>·</span>
@@ -216,8 +207,7 @@ function AppointmentRow({ appointment, onJoin }: AppointmentCardProps) {
             borderRadius: 2,
             color: appointment.status === "IN_PROGRESS" ? L.green : L.accent,
             fontFamily: L.mono, fontSize: 11, letterSpacing: "0.05em",
-            cursor: "pointer",
-            flexShrink: 0,
+            cursor: "pointer", flexShrink: 0,
           }}
         >
           <Video size={12} />
@@ -228,8 +218,9 @@ function AppointmentRow({ appointment, onJoin }: AppointmentCardProps) {
   );
 }
 
-/* ── RequestInbox component ── */
-function RequestInbox({ requests, onMarkHandled }: {
+/* ── RequestInbox ── */
+function RequestInbox({ L, requests, onMarkHandled }: {
+  L: LTokens;
   requests: TeleRequest[];
   onMarkHandled: (id: string) => void;
 }) {
@@ -242,10 +233,10 @@ function RequestInbox({ requests, onMarkHandled }: {
   };
 
   return (
-    <Panel>
-      <PanelSection>
+    <Panel L={L}>
+      <PanelSection L={L}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-          <SectionLabel>Request Website</SectionLabel>
+          <SectionLabel L={L}>Request Website</SectionLabel>
           {pending.length > 0 && (
             <span style={{
               background: "rgba(230,126,34,0.2)", color: L.accent,
@@ -258,7 +249,7 @@ function RequestInbox({ requests, onMarkHandled }: {
       </PanelSection>
 
       {requests.length === 0 ? (
-        <PanelSection last>
+        <PanelSection L={L} last>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "24px 0", gap: 8 }}>
             <Inbox size={24} style={{ color: L.muted, opacity: 0.3 }} />
             <div style={{ fontFamily: L.mono, fontSize: 11, color: L.muted }}>belum ada request</div>
@@ -272,42 +263,29 @@ function RequestInbox({ requests, onMarkHandled }: {
               borderBottom: i < requests.length - 1 ? `1px solid ${L.border}` : "none",
               background: req.status === "PENDING" ? "rgba(230,126,34,0.04)" : "transparent",
             }}>
-              {/* Header: nama + waktu */}
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <User size={11} style={{ color: L.muted }} />
                   <span style={{ fontFamily: L.sans, fontSize: 12, color: req.status === "PENDING" ? L.text : L.muted, fontWeight: req.status === "PENDING" ? 500 : 400 }}>
                     {req.nama}
                   </span>
-                  <span style={{ fontFamily: L.mono, fontSize: 10, color: L.muted }}>
-                    {req.usia}th
-                  </span>
+                  <span style={{ fontFamily: L.mono, fontSize: 10, color: L.muted }}>{req.usia}th</span>
                 </div>
-                <span style={{ fontFamily: L.mono, fontSize: 10, color: L.muted }}>
-                  {formatTime(req.createdAt)}
-                </span>
+                <span style={{ fontFamily: L.mono, fontSize: 10, color: L.muted }}>{formatTime(req.createdAt)}</span>
               </div>
-
-              {/* HP + Poli */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
                 <Phone size={10} style={{ color: L.muted }} />
                 <span style={{ fontFamily: L.mono, fontSize: 10, color: L.muted }}>{req.hp}</span>
                 <span style={{ fontFamily: L.mono, fontSize: 10, color: L.accent, opacity: 0.7 }}>{req.poli}</span>
               </div>
-
-              {/* BPJS jika ada */}
               {req.bpjs && (
                 <div style={{ fontFamily: L.mono, fontSize: 10, color: L.muted, marginBottom: 4 }}>
                   BPJS: {req.bpjs}
                 </div>
               )}
-
-              {/* Keluhan */}
               <div style={{ fontSize: 11, color: L.muted, fontStyle: "italic", marginBottom: req.status === "PENDING" ? 8 : 0, lineHeight: 1.4 }}>
                 {req.keluhan.length > 60 ? req.keluhan.slice(0, 60) + "…" : req.keluhan}
               </div>
-
-              {/* Action */}
               {req.status === "PENDING" && (
                 <button
                   onClick={() => onMarkHandled(req.id)}
@@ -315,10 +293,8 @@ function RequestInbox({ requests, onMarkHandled }: {
                     padding: "3px 10px",
                     background: "rgba(230,126,34,0.12)",
                     border: `1px solid ${L.accent}`,
-                    borderRadius: 2,
-                    color: L.accent,
-                    fontFamily: L.mono, fontSize: 10,
-                    cursor: "pointer",
+                    borderRadius: 2, color: L.accent,
+                    fontFamily: L.mono, fontSize: 10, cursor: "pointer",
                   }}
                 >
                   TANDAI HANDLED
@@ -337,6 +313,7 @@ function RequestInbox({ requests, onMarkHandled }: {
 
 /* ── Main Page ── */
 export default function TelemedicinePage(): React.JSX.Element {
+  const L = useL();
   const router = useRouter();
   const [appointments, setAppointments] = useState<AppointmentWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -367,7 +344,6 @@ export default function TelemedicinePage(): React.JSX.Element {
     } catch { /* silent */ }
   }, []);
 
-  // Cek apakah user adalah dokter + ambil status online
   useEffect(() => {
     void (async () => {
       try {
@@ -376,7 +352,6 @@ export default function TelemedicinePage(): React.JSX.Element {
         const name = data.displayName ?? "";
         if (/^dr[g]?\./i.test(name)) {
           setIsDoctor(true);
-          // Cek status dari doctor-status endpoint
           const statusRes = await fetch("/api/telemedicine/doctor-status");
           const statusData = (await statusRes.json()) as { doctors?: { doctorName: string }[] };
           const online = (statusData.doctors ?? []).some((d) => d.doctorName === name);
@@ -386,30 +361,22 @@ export default function TelemedicinePage(): React.JSX.Element {
     })();
   }, []);
 
-  // Socket.IO: listen real-time request baru + notif suara
   useEffect(() => {
     const socket = socketIO({ path: "/socket.io", transports: ["websocket"] });
     socket.on("telemedicine:new-request", (req: TeleRequest) => {
       setRequests((prev) => [req, ...prev]);
-      // Bell notification via Web Audio API
       try {
         const ctx = new AudioContext();
         const t = ctx.currentTime;
-        // Nada 1
-        const o1 = ctx.createOscillator();
-        const g1 = ctx.createGain();
+        const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
         o1.connect(g1); g1.connect(ctx.destination);
         o1.frequency.value = 880;
-        g1.gain.setValueAtTime(0.4, t);
-        g1.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+        g1.gain.setValueAtTime(0.4, t); g1.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
         o1.start(t); o1.stop(t + 0.6);
-        // Nada 2
-        const o2 = ctx.createOscillator();
-        const g2 = ctx.createGain();
+        const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
         o2.connect(g2); g2.connect(ctx.destination);
         o2.frequency.value = 1100;
-        g2.gain.setValueAtTime(0.3, t + 0.15);
-        g2.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
+        g2.gain.setValueAtTime(0.3, t + 0.15); g2.gain.exponentialRampToValueAtTime(0.001, t + 0.8);
         o2.start(t + 0.15); o2.stop(t + 0.8);
       } catch { /* AudioContext tidak tersedia */ }
     });
@@ -469,7 +436,6 @@ export default function TelemedicinePage(): React.JSX.Element {
         </div>
 
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          {/* Toggle status online — hanya tampil untuk dokter */}
           {isDoctor && (
             <button
               onClick={() => void handleToggleOnline()}
@@ -477,7 +443,7 @@ export default function TelemedicinePage(): React.JSX.Element {
               style={{
                 display: "flex", alignItems: "center", gap: 6,
                 padding: "6px 14px",
-                background: isOnline ? "rgba(74,222,128,0.12)" : "rgba(255,255,255,0.04)",
+                background: isOnline ? "rgba(74,222,128,0.12)" : L.bgHover,
                 border: `1px solid ${isOnline ? "#4ADE80" : L.border}`,
                 borderRadius: 2,
                 color: isOnline ? "#4ADE80" : L.muted,
@@ -495,13 +461,9 @@ export default function TelemedicinePage(): React.JSX.Element {
             onClick={() => void loadAppointments()}
             style={{
               display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px",
-              background: "transparent",
-              border: `1px solid ${L.border}`,
-              borderRadius: 2,
-              color: L.muted,
-              fontFamily: L.mono, fontSize: 11,
-              cursor: "pointer",
+              padding: "6px 12px", background: "transparent",
+              border: `1px solid ${L.border}`, borderRadius: 2,
+              color: L.muted, fontFamily: L.mono, fontSize: 11, cursor: "pointer",
             }}
           >
             <RefreshCw size={12} /> REFRESH
@@ -513,10 +475,8 @@ export default function TelemedicinePage(): React.JSX.Element {
               padding: "6px 14px",
               background: "rgba(230,126,34,0.15)",
               border: `1px solid ${L.accent}`,
-              borderRadius: 2,
-              color: L.accent,
-              fontFamily: L.mono, fontSize: 11, letterSpacing: "0.05em",
-              cursor: "pointer",
+              borderRadius: 2, color: L.accent,
+              fontFamily: L.mono, fontSize: 11, letterSpacing: "0.05em", cursor: "pointer",
             }}
           >
             <Plus size={12} /> BUAT KONSULTASI
@@ -524,23 +484,22 @@ export default function TelemedicinePage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* ── Main Grid: kiri list · kanan sidebar ── */}
+      {/* ── Main Grid ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 240px", gap: 24, alignItems: "start" }}>
 
-        {/* ── Kiri: Appointment list + (optional) booking form ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
 
           {isLoading ? (
-            <Panel>
-              <PanelSection last>
+            <Panel L={L}>
+              <PanelSection L={L} last>
                 <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
                   <div style={{ width: 28, height: 28, border: `2px solid ${L.accent}`, borderTopColor: "transparent", borderRadius: "50%", animation: "spin 1s linear infinite" }} />
                 </div>
               </PanelSection>
             </Panel>
           ) : appointments.length === 0 ? (
-            <Panel>
-              <PanelSection last>
+            <Panel L={L}>
+              <PanelSection L={L} last>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "48px 0", color: L.muted }}>
                   <Video size={36} style={{ opacity: 0.15, marginBottom: 14 }} />
                   <div style={{ fontFamily: L.mono, fontSize: 12, marginBottom: 6 }}>belum ada appointment</div>
@@ -552,10 +511,8 @@ export default function TelemedicinePage(): React.JSX.Element {
                       padding: "6px 16px",
                       background: "rgba(230,126,34,0.15)",
                       border: `1px solid ${L.accent}`,
-                      borderRadius: 2,
-                      color: L.accent,
-                      fontFamily: L.mono, fontSize: 11,
-                      cursor: "pointer",
+                      borderRadius: 2, color: L.accent,
+                      fontFamily: L.mono, fontSize: 11, cursor: "pointer",
                     }}
                   >
                     <Plus size={12} /> BUAT KONSULTASI PERTAMA
@@ -565,30 +522,23 @@ export default function TelemedicinePage(): React.JSX.Element {
             </Panel>
           ) : (
             <>
-              {/* Aktif */}
               {activeAppointments.length > 0 && (
                 <div>
-                  <SectionLabel>Aktif ({activeAppointments.length})</SectionLabel>
-                  <Panel>
+                  <SectionLabel L={L}>Aktif ({activeAppointments.length})</SectionLabel>
+                  <Panel L={L}>
                     {activeAppointments.map((appt) => (
-                      <AppointmentRow
-                        key={appt.id}
-                        appointment={appt}
-                        onJoin={() => router.push(`/telemedicine/${appt.id}`)}
-                      />
+                      <AppointmentRow L={L} key={appt.id} appointment={appt} onJoin={() => router.push(`/telemedicine/${appt.id}`)} />
                     ))}
                     <div style={{ padding: "8px 18px" }} />
                   </Panel>
                 </div>
               )}
-
-              {/* Riwayat */}
               {pastAppointments.length > 0 && (
                 <div>
-                  <SectionLabel>Riwayat ({pastAppointments.length})</SectionLabel>
-                  <Panel>
+                  <SectionLabel L={L}>Riwayat ({pastAppointments.length})</SectionLabel>
+                  <Panel L={L}>
                     {pastAppointments.map((appt) => (
-                      <AppointmentRow key={appt.id} appointment={appt} />
+                      <AppointmentRow L={L} key={appt.id} appointment={appt} />
                     ))}
                     <div style={{ padding: "8px 18px" }} />
                   </Panel>
@@ -597,11 +547,10 @@ export default function TelemedicinePage(): React.JSX.Element {
             </>
           )}
 
-          {/* Booking form — muncul di bawah list */}
           {showBooking && (
             <div>
-              <SectionLabel>Buat Konsultasi Baru</SectionLabel>
-              <Panel>
+              <SectionLabel L={L}>Buat Konsultasi Baru</SectionLabel>
+              <Panel L={L}>
                 <AppointmentBooking
                   onSuccess={handleBookingSuccess}
                   onCancel={() => setShowBooking(false)}
@@ -611,10 +560,9 @@ export default function TelemedicinePage(): React.JSX.Element {
           )}
         </div>
 
-        {/* ── Kanan: Request inbox + diagram alur ── */}
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          <RequestInbox requests={requests} onMarkHandled={handleMarkHandled} />
-          <PatientFlowDiagram />
+          <RequestInbox L={L} requests={requests} onMarkHandled={handleMarkHandled} />
+          <PatientFlowDiagram L={L} />
         </div>
       </div>
     </div>
