@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTheme } from "@/components/ThemeProvider";
 
 function calcAge(birthDate: string): number {
   const today = new Date();
@@ -20,22 +21,28 @@ const QUICK_LINKS = [
   { label: "P-Care BPJS",    desc: "Primary Care BPJS Kesehatan", href: "https://pcarejkn.bpjs-kesehatan.go.id/eclaim",           badge: "BPJS"      },
 ];
 
-/* ── Letta design tokens ── */
-const L = {
-  bg:        "#0f0f0f",
-  bgPanel:   "#141414",
-  bgHover:   "rgba(255,255,255,0.03)",
-  border:    "rgba(255,255,255,0.08)",
-  borderAcc: "rgba(230,126,34,0.4)",
-  text:      "#d4d4d4",
-  muted:     "#666666",
-  accent:    "#E67E22",
-  green:     "#4ADE80",
-  mono:      "var(--font-geist-mono), 'Fira Code', monospace",
-  sans:      "var(--font-geist-sans), sans-serif",
-};
+/* ── Letta design tokens — theme-aware via CSS variables ── */
+function useL() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  return {
+    bg:        isDark ? "#0f0f0f"                     : "var(--bg-canvas)",
+    bgPanel:   isDark ? "#141414"                     : "var(--bg-card, #ffffff)",
+    bgHover:   isDark ? "rgba(255,255,255,0.03)"      : "rgba(201,168,124,0.06)",
+    border:    isDark ? "rgba(255,255,255,0.08)"      : "var(--line-base)",
+    borderAcc: isDark ? "rgba(230,126,34,0.4)"        : "rgba(201,168,124,0.5)",
+    text:      isDark ? "#d4d4d4"                     : "var(--text-main)",
+    muted:     isDark ? "#666666"                     : "var(--text-muted)",
+    accent:    isDark ? "#E67E22"                     : "var(--c-asesmen)",
+    green:     "#4ADE80",
+    mono:      "var(--font-geist-mono), 'Fira Code', monospace",
+    sans:      "var(--font-geist-sans), sans-serif",
+  };
+}
 
-const Row = ({ label, val, mono = false, accent = false }: { label: string; val: string; mono?: boolean; accent?: boolean }) => (
+type LTokens = ReturnType<typeof useL>;
+
+const Row = ({ L, label, val, mono = false, accent = false }: { L: LTokens; label: string; val: string; mono?: boolean; accent?: boolean }) => (
   <div style={{
     display: "grid",
     gridTemplateColumns: "120px 1fr",
@@ -49,13 +56,13 @@ const Row = ({ label, val, mono = false, accent = false }: { label: string; val:
   </div>
 );
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+const SectionLabel = ({ L, children }: { L: LTokens; children: React.ReactNode }) => (
   <div style={{ fontFamily: L.mono, fontSize: 11, color: L.muted, letterSpacing: "0.15em", textTransform: "uppercase", marginBottom: 10 }}>
     {children}
   </div>
 );
 
-const Panel = ({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) => (
+const Panel = ({ L, children, style }: { L: LTokens; children: React.ReactNode; style?: React.CSSProperties }) => (
   <div style={{
     background: L.bgPanel,
     border: `1px solid ${L.border}`,
@@ -67,7 +74,7 @@ const Panel = ({ children, style }: { children: React.ReactNode; style?: React.C
   </div>
 );
 
-const PanelSection = ({ children, last = false }: { children: React.ReactNode; last?: boolean }) => (
+const PanelSection = ({ L, children, last = false }: { L: LTokens; children: React.ReactNode; last?: boolean }) => (
   <div style={{
     padding: "14px 18px",
     borderBottom: last ? "none" : `1px solid ${L.border}`,
@@ -142,6 +149,7 @@ function saveAbsen(key: string, val: boolean) {
 }
 
 export default function ProfilUserPage() {
+  const L = useL();
   const age = calcAge("1982-02-26");
 
   const [absenApel,    setAbsenApel]    = useState(false);
@@ -458,7 +466,7 @@ export default function ProfilUserPage() {
                 Buka EMR Klinis ↗
               </a>
             </div>
-            <div style={{ background: "#0d0d0d", padding: "16px 0", overflowX: "auto" }}>
+            <div style={{ background: "#1e1e1e", padding: "16px 0", overflowX: "auto" }}>
               <pre style={{ margin: 0, fontFamily: L.mono, fontSize: 12, lineHeight: 1.7, userSelect: "none" }}>
                 {CODE_LINES.map((line) => (
                   <div key={line.num} style={{ display: "flex", paddingLeft: 16 }}>
@@ -557,7 +565,7 @@ export default function ProfilUserPage() {
                     <div
                       style={{
                         maxWidth: "78%",
-                        background: "#0d0d0d",
+                        background: L.bgPanel,
                         border: `1px solid ${L.border}`,
                         borderRadius: 4,
                         padding: "8px 12px",
@@ -619,7 +627,7 @@ export default function ProfilUserPage() {
                 style={{
                   flex: 1, height: 36, borderRadius: 4,
                   border: `1px solid ${L.border}`,
-                  background: "#0d0d0d",
+                  background: L.bgPanel,
                   color: L.text,
                   fontFamily: L.sans,
                   fontSize: 13,
@@ -766,10 +774,10 @@ export default function ProfilUserPage() {
 
         {/* ══ KOLOM KIRI — IDENTITAS + AKSES LAYANAN ══ */}
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-        <Panel>
+        <Panel L={L}>
 
           {/* Avatar block */}
-          <PanelSection>
+          <PanelSection L={L}>
             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
               <div style={{
                 width: 56,
@@ -805,18 +813,18 @@ export default function ProfilUserPage() {
           </PanelSection>
 
           {/* Data Pribadi */}
-          <PanelSection>
-            <SectionLabel>Data Pribadi</SectionLabel>
-            <Row label="TTL"        val="Bengkulu, 26 Feb 1982" />
-            <Row label="Usia"       val={`${age} tahun`} />
-            <Row label="Jenis Kel." val="Laki-laki" />
-            <Row label="Domisili"   val="Kediri, Indonesia" />
-            <Row label="Gol. Darah" val="—" />
+          <PanelSection L={L}>
+            <SectionLabel L={L}>Data Pribadi</SectionLabel>
+            <Row L={L} label="TTL"        val="Bengkulu, 26 Feb 1982" />
+            <Row L={L} label="Usia"       val={`${age} tahun`} />
+            <Row L={L} label="Jenis Kel." val="Laki-laki" />
+            <Row L={L} label="Domisili"   val="Kediri, Indonesia" />
+            <Row L={L} label="Gol. Darah" val="—" />
           </PanelSection>
 
           {/* Status */}
-          <PanelSection last>
-            <SectionLabel>Status</SectionLabel>
+          <PanelSection L={L} last>
+            <SectionLabel L={L}>Status</SectionLabel>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {[
                 { label: "AKTIF",        color: L.accent },
@@ -934,18 +942,18 @@ export default function ProfilUserPage() {
         </div>{/* ── end kolom kiri ── */}
 
         {/* ══ PANEL KANAN — PEKERJAAN ══ */}
-        <Panel>
+        <Panel L={L}>
 
           {/* Posisi */}
-          <PanelSection>
-            <SectionLabel>Posisi</SectionLabel>
+          <PanelSection L={L}>
+            <SectionLabel L={L}>Posisi</SectionLabel>
             <div style={{ fontFamily: L.sans, fontSize: 14, color: L.text, marginBottom: 4 }}>Dokter Penanggung Jawab</div>
             <div style={{ fontFamily: L.mono, fontSize: 11, color: L.muted, letterSpacing: "0.06em" }}>Puskesmas Balowerti — Kediri</div>
           </PanelSection>
 
           {/* Konsultan */}
-          <PanelSection>
-            <SectionLabel>Konsultan</SectionLabel>
+          <PanelSection L={L}>
+            <SectionLabel L={L}>Konsultan</SectionLabel>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {["KIA", "USG", "IGD", "PONED", "VCT HIV", "JIWA"].map((k) => (
                 <span key={k} style={{
@@ -960,20 +968,20 @@ export default function ProfilUserPage() {
           </PanelSection>
 
           {/* Institusi */}
-          <PanelSection>
-            <SectionLabel>Institusi</SectionLabel>
-            <Row label="Puskesmas"  val="Puskesmas Balowerti" />
-            <Row label="Dinkes"     val="Dinas Kesehatan Kota Kediri" />
-            <Row label="Perusahaan" val="Sentra Artificial Intelligence" accent />
-            <Row label="Platform"   val="SentraOne" />
-            <Row label="Jabatan"    val="CEO & Founder" />
+          <PanelSection L={L}>
+            <SectionLabel L={L}>Institusi</SectionLabel>
+            <Row L={L} label="Puskesmas"  val="Puskesmas Balowerti" />
+            <Row L={L} label="Dinkes"     val="Dinas Kesehatan Kota Kediri" />
+            <Row L={L} label="Perusahaan" val="Sentra Artificial Intelligence" accent />
+            <Row L={L} label="Platform"   val="SentraOne" />
+            <Row L={L} label="Jabatan"    val="CEO & Founder" />
           </PanelSection>
 
           {/* Kredensial */}
-          <PanelSection last>
-            <SectionLabel>Kredensial &amp; Lisensi</SectionLabel>
-            <Row label="STR" val="ER00001614473619"              mono />
-            <Row label="SIP" val="503/0129/SIP-SIK-D/419.104/2025" mono />
+          <PanelSection L={L} last>
+            <SectionLabel L={L}>Kredensial &amp; Lisensi</SectionLabel>
+            <Row L={L} label="STR" val="ER00001614473619"              mono />
+            <Row L={L} label="SIP" val="503/0129/SIP-SIK-D/419.104/2025" mono />
             <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 8 }}>
               <span style={{ width: 5, height: 5, borderRadius: "50%", background: L.green, boxShadow: `0 0 6px ${L.green}`, display: "inline-block", flexShrink: 0 }} />
               <span style={{ fontFamily: L.mono, fontSize: 12, color: L.muted, letterSpacing: "0.1em" }}>STR &amp; SIP VALID — 2025</span>
