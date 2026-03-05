@@ -225,6 +225,7 @@ html, body {
   color: var(--text-main);
   font-family: var(--font-sans);
   font-size: 14px;
+  font-weight: 400;
   line-height: var(--lh-relaxed);
   min-height: 100vh;
   overflow-x: hidden;
@@ -569,7 +570,7 @@ a { color: inherit; text-decoration: none; }
 .page-title {
   font-family: var(--font-sans);
   font-size: 36px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-main);
   letter-spacing: -0.02em;
 }
@@ -664,7 +665,7 @@ a { color: inherit; text-decoration: none; }
 .patient-narrative {
   font-family: var(--font-sans);
   font-size: 24px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;
   letter-spacing: -0.01em;
   color: var(--text-muted);
@@ -829,7 +830,7 @@ a { color: inherit; text-decoration: none; }
 .v-value {
   font-family: var(--font-mono);
   font-size: 32px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-main);
   line-height: 1;
   letter-spacing: -1px;
@@ -1092,7 +1093,7 @@ a { color: inherit; text-decoration: none; }
 .insight-text-sidebar {
   font-family: var(--font-sans);
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--text-main);
 }
@@ -1124,7 +1125,7 @@ a { color: inherit; text-decoration: none; }
   border: none;
   font-size: 20px;
   font-family: var(--font-sans);
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-main);
   outline: none;
   border-bottom: 1px solid var(--line-base);
@@ -1160,11 +1161,11 @@ a { color: inherit; text-decoration: none; }
   justify-content: center;
   font-family: var(--font-sans);
   font-size: 24px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-muted);
 }
 
-.profil-name { font-family: var(--font-sans); font-size: 28px; font-weight: 300; color: var(--text-main); line-height: 1.3; }
+.profil-name { font-family: var(--font-sans); font-size: 28px; font-weight: 400; color: var(--text-main); line-height: 1.3; }
 .profil-rm { font-family: var(--font-mono); font-size: 14px; color: var(--c-asesmen); letter-spacing: 0.2em; }
 
 .profil-field { display: grid; grid-template-columns: 120px 1fr; gap: 8px; align-items: baseline; border-bottom: 1px dashed var(--line-base); padding-bottom: 8px; }
@@ -1190,7 +1191,7 @@ a { color: inherit; text-decoration: none; }
   border-bottom: 1px solid var(--line-base);
   font-family: var(--font-sans);
   font-size: 32px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-main);
   outline: none;
   padding-bottom: 16px;
@@ -1305,7 +1306,7 @@ a { color: inherit; text-decoration: none; }
   justify-content: space-between;
 }
 
-.chat-header-name { font-family: var(--font-sans); font-size: 20px; font-weight: 300; color: var(--text-main); }
+.chat-header-name { font-family: var(--font-sans); font-size: 20px; font-weight: 400; color: var(--text-main); }
 .chat-header-meta { font-family: var(--font-mono); font-size: 13px; color: var(--text-muted); letter-spacing: 0.1em; }
 
 .chat-messages {
@@ -1328,7 +1329,7 @@ a { color: inherit; text-decoration: none; }
 .chat-bubble {
   font-family: var(--font-sans);
   font-size: 15px;
-  font-weight: 300;
+  font-weight: 400;
   color: var(--text-main);
   padding: 12px 16px;
   border: 1px solid var(--line-base);
