@@ -388,46 +388,30 @@ export default function ProfilUserPage() {
           padding: "0 20px",
           marginTop: 12,
         }}>
-          {/* Tab strip — nm raised pill container */}
-          <div style={{
-            display: "flex",
-            gap: 4,
-            padding: "4px",
-            borderRadius: 6,
-            background: L.bg,
-            boxShadow: L.bg === "var(--bg-canvas)"
-              ? "inset 2px 2px 5px rgba(0,0,0,0.35), inset -1px -1px 3px rgba(255,255,255,0.04)"
-              : "inset 1px 1px 3px rgba(45,36,32,0.12), inset -1px -1px 2px rgba(255,255,255,0.6)",
-            marginBottom: 6,
-          }}>
+          <div style={{ display: "flex" }}>
             {HERO_TABS.map((t, i) => {
               const isActive = i === activeTab && heroExpanded;
-              const isDark = L.bg === "var(--bg-canvas)";
+              const isDark = L.bgPanel === "#303030";
               return (
                 <div
                   key={t}
                   onClick={() => { setActiveTab(i); if (!heroExpanded) setHeroExpanded(true); }}
                   style={{
-                    padding: "6px 14px",
+                    padding: "9px 16px",
                     fontFamily: L.mono,
                     fontSize: 11,
                     color: isActive ? L.text : L.muted,
                     letterSpacing: "0.04em",
                     cursor: "pointer",
-                    borderRadius: 4,
-                    transition: "all 0.18s",
-                    userSelect: "none",
-                    background: isActive
-                      ? L.bgPanel
-                      : "transparent",
+                    marginBottom: -1,
+                    userSelect: "none" as const,
+                    transition: "color 0.15s",
+                    borderBottom: isActive ? `1px solid ${L.accent}` : "1px solid transparent",
                     boxShadow: isActive
                       ? isDark
-                        ? "2px 2px 5px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,255,255,0.06)"
-                        : "1px 1px 4px rgba(45,36,32,0.15), -1px -1px 2px rgba(255,255,255,0.9)"
+                        ? "inset 0 -2px 6px rgba(0,0,0,0.25)"
+                        : "inset 0 -2px 4px rgba(45,36,32,0.08)"
                       : "none",
-                    borderBottom: isActive
-                      ? `1px solid ${L.accent}`
-                      : "1px solid transparent",
                   }}
                 >{t}</div>
               );
