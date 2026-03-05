@@ -4,7 +4,7 @@
 :root,
 [data-theme="dark"] {
   --bg-canvas: #212121;        /* Main dark */
-  --bg-nav: #131313;           /* Sidebar darker */
+  --bg-nav: #303030;           /* Card/panel surface — sedikit lebih terang dari canvas */
   --text-main: #F0E8DC;        /* Cream warm text */
   --text-muted: #A0A0A0;       /* Muted gray */
   --line-base: #333333;        /* Border */
