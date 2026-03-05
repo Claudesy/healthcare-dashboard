@@ -19,18 +19,19 @@
 
 /* ─── Light Theme (Cream — matches puskesmasbalowerti.com) ─── */
 [data-theme="light"] {
-  --bg-canvas: #F8F5F2;        /* Website bg exact */
-  --bg-nav: #FAF3EB;           /* Website card bg */
-  --text-main: #2D2420;        /* Website dark text */
-  --text-muted: #8B7D6F;       /* Website muted exact */
-  --line-base: #EADDCB;        /* Website border exact */
-  --grid-faint: rgba(45, 36, 32, 0.04);
+  --bg-canvas: #EDE4D9;        /* Canvas: shade 200 — warm tan, kontras vs card */
+  --bg-nav: #FAF3EB;           /* Nav sidebar: shade 100 — cream */
+  --bg-card: #FFFFFF;          /* Card surface: putih bersih, kontras jelas */
+  --text-main: #2D2420;        /* shade 950 — dark brown */
+  --text-muted: #8B7D6F;       /* shade 700 — muted warm */
+  --line-base: #DEC9A8;        /* shade 300 — border visible */
+  --grid-faint: rgba(45, 36, 32, 0.05);
   --c-anamnesa: #8B7D6F;
-  --c-asesmen: #C9A87C;        /* Website accent gold exact */
+  --c-asesmen: #C9A87C;        /* brand accent exact */
   --c-critical: #C0392B;
-  --c-warning: #B8956A;        /* Website accent hover */
-  --theme-toggle-bg: rgba(201, 168, 124, 0.12);
-  --theme-toggle-border: #EADDCB;
+  --c-warning: #B8956A;        /* shade 600 */
+  --theme-toggle-bg: rgba(201, 168, 124, 0.15);
+  --theme-toggle-border: #DEC9A8;
 }
 
 /* Light Theme Overrides (Cream — matches puskesmasbalowerti.com) */
@@ -486,8 +487,8 @@ a { color: inherit; text-decoration: none; }
   padding: 3px 8px;
 }
 [data-theme="light"] .nm-badge {
-  background: #F5EDE2;
-  box-shadow: inset 2px 2px 5px #ccc4ba, inset -2px -2px 4px #fdf6ee;
+  background: #EADDCB;
+  box-shadow: inset 1px 1px 3px rgba(45,36,32,0.12), inset -1px -1px 2px rgba(255,255,255,0.8);
   border: none;
   border-radius: 4px;
   padding: 3px 8px;
@@ -500,8 +501,8 @@ a { color: inherit; text-decoration: none; }
   border: 1px solid var(--line-base);
 }
 [data-theme="light"] .nm-card {
-  background: var(--bg-nav);
-  box-shadow: 4px 4px 10px rgba(0,0,0,0.08), -3px -3px 8px rgba(253,246,238,0.9);
+  background: var(--bg-card);
+  box-shadow: 0 2px 8px rgba(45,36,32,0.10), 0 1px 2px rgba(45,36,32,0.06);
   border: 1px solid var(--line-base);
 }
 
@@ -512,9 +513,9 @@ a { color: inherit; text-decoration: none; }
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
 }
 [data-theme="light"] .nm-card-flat {
-  background: var(--bg-nav);
+  background: var(--bg-card);
   border: 1px solid var(--line-base);
-  box-shadow: inset 0 1px 0 rgba(253,246,238,0.9);
+  box-shadow: none;
 }
 
 /* ── Content area ── */
